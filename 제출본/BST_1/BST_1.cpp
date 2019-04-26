@@ -30,7 +30,7 @@ int treeNodeCount = 0;
 void read_file();
 Node *make_node(char *word, char *word_class, char *meaning);
 Node *tree_search(Node *x, char *word);
-void tree_insert(Node *root, Node *z);
+void tree_insert(Node *z);
 char *makeUpper(char *arr);
 void process_command();
 Node *tree_delete(Node *z);
@@ -38,8 +38,9 @@ Node *tree_successor(Node *x);
 Node *tree_minimum(Node *x);
 void deleteAll(char *fileName);
 void erase_node(Node *y);
+void post_order_to_delete(Node *x);
 
-//제대로 정렬되어 들어갔는지 확인
+//제대로 정렬되어 들어갔는지 확인 -> inorder탐색 해봄.
 /*
 void inorder_tree_walk(Node *x) {
 	if (x == NULL)
@@ -54,9 +55,20 @@ void inorder_tree_walk(Node *x) {
 }
 */
 
+//postorder : 트리 전부 삭제(동적할당 해제) : 자식 삭제 후 본인 삭제하기 위해.
+void post_order_to_delete(Node *x) {
+	if (x != NULL) {
+		post_order_to_delete(x->left);
+		post_order_to_delete(x->right);
+		erase_node(x);
+	}
+
+}
+
 void main() {
 	read_file();
 	process_command();
+	post_order_to_delete(treeRoot);
 }
 
 //비쥬얼 스튜디오에서는 strsep이 없어 인터넷을 참고하여 원형을 따로 구현했습니다.
@@ -111,7 +123,7 @@ void read_file() {
 		}
 		else {//같은 단어 없으면 새로 추가
 			Node *newNode = make_node(word, wordClass, meaning);
-			tree_insert(treeRoot, newNode);
+			tree_insert(newNode);
 			treeNodeCount++;
 		}
 
@@ -154,9 +166,9 @@ Node *tree_search(Node *x, char *word) {
 }
 
 //트리 추가 : z는 추가할 노드, root가 NULL이면 그 노드가 root가 됨.
-void tree_insert(Node *root, Node *z) {
+void tree_insert(Node *z) {
 	Node *y = NULL;
-	Node *x = root;
+	Node *x = treeRoot;
 
 	while (x != NULL) {
 		y = x;
@@ -251,8 +263,8 @@ void process_command() {
 				char *cpyWord = strdup(word);
 				char *cpyWordClass = strdup(wordClass);
 				char *cpyMeaning = strdup(meaning);
-				Node *newNode = make_node(word, cpyWordClass, cpyMeaning);
-				tree_insert(treeRoot, newNode);
+				Node *newNode = make_node(cpyWord, cpyWordClass, cpyMeaning);
+				tree_insert(newNode);
 				treeNodeCount++;
 			}
 		}
